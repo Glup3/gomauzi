@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/spf13/viper"
@@ -9,13 +8,14 @@ import (
 
 func main() {
 	viper.SetConfigFile("ENV")
+	viper.ReadInConfig()
 	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8052")
 
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println("Error reading config file")
-		panic(err)
-	}
+	// if err := viper.ReadInConfig(); err != nil {
+	// 	fmt.Println("Error reading config file")
+	// 	panic(err)
+	// }
 
 	PORT := viper.GetString("PORT")
 
