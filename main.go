@@ -1,21 +1,26 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/spf13/viper"
 )
 
 func main() {
+	// config file for railway
 	viper.SetConfigFile("ENV")
-	viper.ReadInConfig()
+
+	if err := viper.ReadInConfig(); err != nil {
+		viper.SetConfigFile(".env")
+		fmt.Println("Reading from .env file")
+		if err := viper.ReadInConfig(); err != nil {
+			panic(err)
+		}
+	}
+
 	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8052")
-
-	// if err := viper.ReadInConfig(); err != nil {
-	// 	fmt.Println("Error reading config file")
-	// 	panic(err)
-	// }
 
 	PORT := viper.GetString("PORT")
 
@@ -27,5 +32,9 @@ func main() {
 		w.Write([]byte("Hello GoMauzi"))
 	})
 
-	http.ListenAndServe(":"+PORT, nil)
+	fmt.Println("Server running on port", PORT)
+
+	if err := http.ListenAndServe(":"+PORT, nil); err != nil {
+		panic(err)
+	}
 }
