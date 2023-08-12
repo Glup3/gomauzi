@@ -1,40 +1,33 @@
 package main
 
 import (
-	"fmt"
+	"glup3/handlers"
+	"log"
 	"net/http"
 
+	"github.com/gorilla/mux"
 	"github.com/spf13/viper"
 )
 
 func main() {
 	// config file for railway
 	viper.SetConfigFile("ENV")
-
-	if err := viper.ReadInConfig(); err != nil {
-		viper.SetConfigFile(".env")
-		fmt.Println("Reading from .env file")
-		if err := viper.ReadInConfig(); err != nil {
-			panic(err)
-		}
-	}
-
 	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8052")
 
-	PORT := viper.GetString("PORT")
-
-	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello GoMauzi"))
-	})
-
-	fmt.Println("Server running on port", PORT)
-
-	if err := http.ListenAndServe(":"+PORT, nil); err != nil {
-		panic(err)
+	if err := viper.ReadInConfig(); err != nil {
+		viper.SetConfigFile(".env")
+		log.Println("Reading from .env file")
+		if err := viper.ReadInConfig(); err != nil {
+			log.Fatal(err)
+		}
 	}
+
+	r := mux.NewRouter()
+
+	r.HandleFunc("/api/v1/trecord", handlers.ReadEntry).Methods("GET")
+
+	PORT := viper.GetString("PORT")
+	log.Println("Listening on port " + PORT)
+	log.Fatal(http.ListenAndServe(":"+PORT, r))
 }
