@@ -9,6 +9,7 @@ import (
 
 func main() {
 	viper.SetConfigFile("ENV")
+	viper.AutomaticEnv()
 	viper.SetDefault("PORT", "8052")
 
 	if err := viper.ReadInConfig(); err != nil {
