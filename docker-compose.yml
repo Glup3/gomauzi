@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  db:
+    container_name: db
+    image: timescale/timescaledb-postgis:latest-pg13
+    ports:
+      - 5432:5432
+    volumes:
+      - db_data:/home/postgres/pgdata/data
+    environment:
+      POSTGRES_DB: mauzi
+      POSTGRES_USER: mauzi
+      POSTGRES_PASSWORD: mauzipw
+
+volumes:
+  db_data:

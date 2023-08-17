@@ -1,11 +1,16 @@
 package main
 
 import (
+	"database/sql"
 	"glup3/handlers"
 	"log"
 	"net/http"
 
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 	"github.com/gorilla/mux"
+	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 )
 
@@ -22,6 +27,27 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+
+	connStr := viper.GetString("DATABASE_URL")
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatalf("Unable to connect to database %s", err)
+	}
+	defer db.Close()
+
+	log.Println("Applying migrations")
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		log.Fatalf("Unable to get database driver %s", err)
+	}
+
+	mi, err := migrate.NewWithDatabaseInstance("file://migrations", "postgres", driver)
+	if err != nil {
+		log.Fatalf("Unable to locate migrations %s", err)
+	}
+
+	mi.Up()
 
 	r := mux.NewRouter()
 
