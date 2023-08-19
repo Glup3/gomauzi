@@ -35,8 +35,6 @@ func main() {
 	}
 	defer db.Close()
 
-	log.Println("Applying migrations")
-
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
 		log.Fatalf("Unable to get database driver %s", err)
@@ -47,7 +45,14 @@ func main() {
 		log.Fatalf("Unable to locate migrations %s", err)
 	}
 
-	mi.Up()
+	log.Println("Applying migrations")
+	if err := mi.Up(); err != nil {
+		if err == migrate.ErrNoChange {
+			log.Println("Migrations are up to date.")
+		} else {
+			log.Fatalf("Unable to apply migrations %s", err)
+		}
+	}
 
 	r := mux.NewRouter()
 
